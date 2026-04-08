@@ -1,0 +1,5 @@
+onnxruntime
+numpy
+cython
+confluent-kafka
+pytz
