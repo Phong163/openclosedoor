@@ -42,11 +42,14 @@ class KafkaService:
             "cam_id": camera_id,
             "metric":"opencloseddoor",
             "door_state": state,
-            "conf": conf,
+            "conf": int(conf * 100),
             "emb": image_base64,
             "timestamp": timestamp
             }
+        # debug_data = data.copy()
+        # debug_data["emb"] = "...base64_image_hidden..."
 
+        # print("data:", debug_data)
         try:
             message = json.dumps(data).encode("utf-8")
 

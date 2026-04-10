@@ -1,14 +1,15 @@
 models:
-    yoloONNX_weight: "./weights/best2.onnx"
-    yoloONNX_classify: "./weights/best_staff_customer_vtt.onnx"
+    yoloONNX_detection_weight: "./weights/best_openclose_9_4.onnx"
+    yoloONNX_classify_weights: "./weights/best_openclose_9_4.onnx"
+    class_detection_names: [person]
+    class_clasify_names: ["closed", "open"]
+
 cameras:
   0:
     rtsp_url: "rtsp://admin:eidox2026@293pvdcam1.cameraddns.net:5554/live"
-    box_id: "2e5e8861-75ed-4c5a-b6ec-ddb89b04e8c7"
-    cam_id: "17052f6b-00a0-4562-9574-5d291b5fd6de"
+    box_id: "31f52bb2-686f-48ae-a472-2c2aa1329d80"
+    cam_id: "bc4e9e35-cf47-4f1e-a83e-b4b2e5e2639d"
     zone_id: "550e8400-e29b-41d4-a716-446655440000"
-    max_person: 12  # Mức độ cảnh báo
-    kafka_interval: 5 # Thời gian gửi mess tiếp
     current_frame : 0
     zone_1: [[0.76, 0.14], [0.49, 0.02], [0.48, 0.41], [0.69, 0.7]]
     zone_2: [[0.46, 1.0], [0.55, 0.69], [0.29, 0.57], [0.09, 0.9], [0.14, 1.0]]

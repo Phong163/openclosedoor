@@ -1,11 +1,11 @@
 import cv2
 import numpy as np
-import time
 import os
 import base64
 import logging
 from core.zones import Zone
-
+from datetime import datetime, time as dt_time
+import time
 from core.detector import YoloClassify
 from tool.rtsp_stream import RTSPStream
 from tool.utils import check_base64_image
@@ -37,12 +37,10 @@ class Classify:
 
         self.zone_1 = config["zone_1"]
         self.zone_id = config["zone_id"]
-        self.max_person = config["max_person"]
 
         self.box_id = config["box_id"]
-        self.kafka_interval = config["kafka_interval"] * 60
 
-        self.show_video = True
+        self.show_video = show_video
         self.send_api = send_api
         self.video_path = video_path
         self.output_path = output_path
@@ -50,8 +48,8 @@ class Classify:
 
         # ===== STATE =====
         self.prev_state = None
-        self.last_kafka_time = None
-
+        self.waiting_to_100 = False
+        self.send_state = None
         # ===== STREAM =====
         self.rtsp_stream = None
 
@@ -95,17 +93,10 @@ class Classify:
     # KAFKA
     # =========================
     def handle_kafka(self, state, conf, frame):
-        now = time.time()
 
-        # if (
-        #     self.last_kafka_time is not None
-        #     and now - self.last_kafka_time < self.kafka_interval
-        # ):
-        #     return
         self._send_kafka(state, conf, frame)
         logging.info(f"[Kafka] Overload cam {self.camera_id}")
 
-        self.last_kafka_time = now
     def _send_kafka(self, state, conf, frame):
         frame = cv2.resize(frame, (720, 640))
         img_base64 = self.encode_frame(frame)
@@ -113,14 +104,13 @@ class Classify:
 
         self.kafka_service.send(
             self.box_id,
-            self.camera_id,
+            self.cam_id,
             state,
             conf,   
             img_base64
         )
     # =========================
     # MAIN PROCESS
-    # =========================
     def process_frame(self, frame):
         annotated = frame.copy()
         height, width, _ = frame.shape
@@ -160,14 +150,34 @@ class Classify:
                 color,
                 8
             )
-
+            #===== STATE to 100 conf LOGIC =====
+            if self.waiting_to_100:
+                if conf > 0.96 and self.send_state is not None :
+                    logging.info(f"Waiting to 100 state={self.send_state}, conf={conf:.2f}")
+                    if self.send_api:
+                        logging.info(f"[SEND KAFKA] state={self.send_state}, conf={conf:.2f}")
+                        self.handle_kafka(self.send_state, conf, annotated)
+                        
+                    self.waiting_to_100 = False
+                    self.send_state = None
             # ===== STATE CHANGE LOGIC =====
             if self.prev_state is not None and current_state != self.prev_state:
                 logging.info(
                     f"[STATE CHANGE] Cam {self.camera_id}: {self.prev_state} -> {current_state}"
                 )
+                self.waiting_to_100 = True
+                now = datetime.now().time()
+                  
+                if current_state == "open" and dt_time(9, 0) > now > dt_time(5, 0):
+                    self.send_state = "late_open"
+
+                elif current_state == "closed" and  dt_time(19, 0) < now < dt_time(22, 0):
+                    self.send_state = "early_close"
                 if self.send_api:
-                    self.handle_kafka(current_state, conf, annotated)
+                    # ===== GỬI =====
+                    if self.send_state:
+                        logging.info(f"[SEND KAFKA] state={self.send_state}, conf={conf:.2f}")
+                        self.handle_kafka(self.send_state, conf, annotated)
 
             # update state
             self.prev_state = current_state

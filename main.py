@@ -66,7 +66,7 @@ def main():
     config_all = get_config()
 
     # load model (CHỈ LOAD 1 LẦN)
-    model = YoloONNXCLASSIFY(config_all["models"]["yoloONNX_weight"])
+    model = YoloONNXCLASSIFY(config_all["models"]["yoloONNX_classify_weights"])
 
     # chọn camera
     camera_ids = get_camera_ids(config_all, args)
