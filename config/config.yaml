@@ -1,19 +1,19 @@
 models:
-    yoloONNX_detection_weight: "./weights/best_openclose_9_4.onnx"
-    yoloONNX_classify_weights: "./weights/best_openclose_9_4.onnx"
+    yoloONNX_detection_weight: "./weights/openclosedoor21_4.onnx"
+    yoloONNX_classify_weights: "./weights/openclosedoor21_4.onnx"
     class_detection_names: [person]
     class_clasify_names: ["closed", "open"]
 
 cameras:
   0:
-    rtsp_url: "rtsp://admin:eidox2026@293pvdcam1.cameraddns.net:5554/live"
+    rtsp_url: "rtsp://admin:eidox2026@293pvdcam3.cameraddns.net:5556/live"
     box_id: "31f52bb2-686f-48ae-a472-2c2aa1329d80"
     cam_id: "bc4e9e35-cf47-4f1e-a83e-b4b2e5e2639d"
     zone_id: "550e8400-e29b-41d4-a716-446655440000"
     current_frame : 0
-    zone_1: [[0.76, 0.14], [0.49, 0.02], [0.48, 0.41], [0.69, 0.7]]
-    zone_2: [[0.46, 1.0], [0.55, 0.69], [0.29, 0.57], [0.09, 0.9], [0.14, 1.0]]
-    zone_3: [[0.67, 0.09], [0.46, 0.09], [0.36, 0.2], [0.39, 0.36], [0.45, 0.36], [0.5, 0.28], [0.67, 0.27]]  
+    zone_1:  [[0.84, 0.01], [0.07, 0.0], [0.18, 0.74], [0.82, 0.7]]
+    zone_2: [[0.67, 0.0], [0.47, 0.0], [0.47, 0.24], [0.66, 0.28]]
+    zone_3: [[0.76, 0.14], [0.49, 0.02], [0.48, 0.41], [0.69, 0.7]]
  
 kafka:
   broker: "gateway-1.hn.eidox.ai:9093"

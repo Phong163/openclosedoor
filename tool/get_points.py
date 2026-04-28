@@ -20,7 +20,7 @@ def mouse_callback(event, x, y, flags, param):
             cv2.destroyAllWindows()
 
 # Đọc ảnh
-image = cv2.imread(r"C:\Users\admin\Desktop\VTT2\data\closedoor_VTT0001.jpg")
+image = cv2.imread(r"C:\Users\admin\Downloads\Screenshot 2026-04-16 233917.png")
 image = cv2.resize(image, (720, 640))
 if image is None:
     print("Không thể tải ảnh!")

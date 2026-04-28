@@ -2,8 +2,8 @@ import cv2
 import os
 
 # Đường dẫn video và thư mục lưu frame
-video_path = r'C:\Users\admin\Desktop\VTT2\video6.mp4'
-save_folder = r'C:\Users\admin\Desktop\VTT2\data'
+video_path = r'C:\Users\admin\Videos\vlc-record-2026-04-20-20h39m02s-rtsp___293pvdcam3.cameraddns.net_5556_live-.mp4'
+save_folder = r'C:\Users\admin\Desktop\VTT_opendoor\data'
 os.makedirs(save_folder, exist_ok=True)
 
 # Load video
@@ -21,10 +21,10 @@ while True:
     if not ret:
         break  # Kết thúc video
 
-    if frame_count % 25 == 0 :#and saved_count < 501
+    if frame_count % 50 == 0 :#and saved_count < 501
         saved_count += 1
         height, width, _ = frame.shape
-        zone = [[0.76, 0.14], [0.49, 0.02], [0.48, 0.41], [0.69, 0.7]]
+        zone = [[0.84, 0.01], [0.07, 0.0], [0.18, 0.74], [0.82, 0.7]]
         pts = [(int(x * width), int(y * height)) for x, y in zone]
         x_min = min([p[0] for p in pts])
         y_min = min([p[1] for p in pts])
@@ -34,8 +34,8 @@ while True:
         crop = frame[y_min:y_max, x_min:x_max]
         # roi = [450, 0, 1700, 300]
         # frame_roi = frame[roi[1]:roi[1] + roi[3], roi[0]:roi[0] + roi[2]]
-        save_path = os.path.join(save_folder, f"opendoor6_VTT{saved_count:04d}.jpg")
-        cv2.imwrite(save_path, crop)
+        save_path = os.path.join(save_folder, f"opendoor11_VTT{saved_count:04d}.jpg")
+        cv2.imwrite(save_path, frame)
         print(f"Đã lưu {save_path}")
         
         # Thoát bằng phím 'q'

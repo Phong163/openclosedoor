@@ -4,7 +4,6 @@ import os
 import base64
 import logging
 from core.zones import Zone
-from datetime import datetime, time as dt_time
 import time
 from core.detector import YoloClassify
 from tool.rtsp_stream import RTSPStream
@@ -49,7 +48,7 @@ class Classify:
         # ===== STATE =====
         self.prev_state = None
         self.waiting_to_100 = False
-        self.send_state = None
+        self.waiting_state = None
         # ===== STREAM =====
         self.rtsp_stream = None
 
@@ -138,46 +137,44 @@ class Classify:
             current_state = result["class_name"]   # "open" hoặc "close"
             conf = result["confidence"]
 
-            label = f"{current_state}_{(conf*100):.0f}%"
-            color = (0, 255, 0) if current_state == "open" else (0, 0, 255)
+            # label = f"{current_state}_{(conf*100):.0f}%"
+            # color = (0, 255, 0) if current_state == "open" else (0, 0, 255)
 
-            cv2.putText(
-                annotated,
-                label,
-                (1650, 120),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                5,
-                color,
-                8
-            )
-            #===== STATE to 100 conf LOGIC =====
+            # cv2.putText(
+            #     annotated,
+            #     label,
+            #     (1650, 120),
+            #     cv2.FONT_HERSHEY_SIMPLEX,
+            #     5,
+            #     color,
+            #     8
+            # )
+            #===== STATE to waiting_to_100100 conf LOGIC =====
             if self.waiting_to_100:
-                if conf > 0.96 and self.send_state is not None :
-                    logging.info(f"Waiting to 100 state={self.send_state}, conf={conf:.2f}")
+                if conf > 0.96 and self.waiting_state is not None and current_state == self.waiting_state:
+                    logging.info(f"Waiting to 100 state={self.waiting_state}, conf={conf:.2f}")
                     if self.send_api:
-                        logging.info(f"[SEND KAFKA] state={self.send_state}, conf={conf:.2f}")
-                        self.handle_kafka(self.send_state, conf, annotated)
-                        
+                        logging.info(f"[SEND KAFKA] state={self.waiting_state}, conf={conf:.2f}")
+                        self.handle_kafka(self.waiting_state, conf, annotated)
                     self.waiting_to_100 = False
-                    self.send_state = None
+                    self.waiting_state = None
+               
             # ===== STATE CHANGE LOGIC =====
             if self.prev_state is not None and current_state != self.prev_state:
                 logging.info(
                     f"[STATE CHANGE] Cam {self.camera_id}: {self.prev_state} -> {current_state}"
                 )
-                self.waiting_to_100 = True
-                now = datetime.now().time()
-                  
-                if current_state == "open" and dt_time(9, 0) > now > dt_time(5, 0):
-                    self.send_state = "late_open"
-
-                elif current_state == "closed" and  dt_time(19, 0) < now < dt_time(22, 0):
-                    self.send_state = "early_close"
-                if self.send_api:
-                    # ===== GỬI =====
-                    if self.send_state:
-                        logging.info(f"[SEND KAFKA] state={self.send_state}, conf={conf:.2f}")
-                        self.handle_kafka(self.send_state, conf, annotated)
+                if current_state == "open":
+                    self.waiting_to_100 = True
+                    self.waiting_state = "open"
+                elif current_state == "closed":
+                    self.waiting_to_100 = True
+                    self.waiting_state = "closed"
+                # if self.send_api:
+                #     # ===== GỬI =====
+                #     if self.waiting_state:
+                #         logging.info(f"[SEND KAFKA] state={self.waiting_state}, conf={conf:.2f}")
+                #         self.handle_kafka(self.waiting_state, conf, annotated)
 
             # update state
             self.prev_state = current_state

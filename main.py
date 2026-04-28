@@ -50,7 +50,7 @@ def parse_args():
     parser.add_argument(
         "--video_path",
         type=str,
-        default=None,
+        default=r"C:\Users\admin\Videos\vlc-record-2026-04-20-19h08m24s-rtsp___293pvdcam3.cameraddns.net_5556_live-.mp4",
         help="Run with video file instead of RTSP"
     )
 
